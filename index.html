@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini Google 1998</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏄</text></svg>">
+<style>
+  /* =====================================================
+     THEMES: every colour lives in a variable, so the
+     theme button only has to swap these few numbers.
+     ===================================================== */
+  body, body.modern {
+    --bg: linear-gradient(160deg, #e9f1ff 0%, #fdf2ff 50%, #fff6e6 100%);
+    --card: #ffffff;  --ink: #1f2340;  --muted: #5b6088;  --line: #cfd6ff;
+    --accent: #7a4cff;  --shadow: 0 3px 12px rgba(60, 70, 160, .12);
+    --radius: 16px;  --font: "Segoe UI", Tahoma, Arial, sans-serif;
+    --oldbg: linear-gradient(135deg, #8d6e63, #bf8a4b);
+    --surfbg: linear-gradient(135deg, #1e9e8a, #34a853);
+    --dimnode: #d5d9f0;  --dimtext: #7a80a8;
+  }
+  body.dark {
+    --bg: linear-gradient(160deg, #0e1230 0%, #1a1240 55%, #2a1538 100%);
+    --card: #1b2046;  --ink: #e8ebff;  --muted: #a3a9d6;  --line: #363d7a;
+    --accent: #9d82ff;  --shadow: 0 3px 14px rgba(0, 0, 0, .45);
+    --dimnode: #2c3366;  --dimtext: #8c93c8;
+  }
+  body.retro {
+    --bg: #c0c0c0;
+    --card: #ffffff;  --ink: #000000;  --muted: #333333;  --line: #808080;
+    --accent: #0000ee;  --shadow: none;  --radius: 0px;
+    --font: "Times New Roman", Times, serif;
+    --oldbg: #800000;  --surfbg: #000080;
+    --dimnode: #d0d0d0;  --dimtext: #555;
+  }
+
+  /* ---------- Basic look ---------- */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: var(--font);
+    color: var(--ink); background: var(--bg); background-attachment: fixed;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 50px; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- Scrolling banner (very 1998) ---------- */
+  .ticker { overflow: hidden; white-space: nowrap; background: #1f2340; color: #ffe14d;
+    font-size: 13px; padding: 6px 0; }
+  .ticker span { display: inline-block; padding-left: 100%; animation: scroll 32s linear infinite; }
+  @keyframes scroll { to { transform: translateX(-100%); } }
+
+  .topbar { display: flex; justify-content: flex-end; padding: 12px 0 0; }
+  .pill { border: 2px solid var(--line); background: var(--card); color: var(--ink);
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .pill:hover { border-color: var(--accent); }
+
+  /* ---------- Logo ---------- */
+  .logo { text-align: center; font-size: 68px; font-weight: 800; letter-spacing: -2px; margin: 0;
+    text-shadow: 0 4px 0 rgba(0,0,0,.08); }
+  .logo span:nth-child(1){color:#4285f4} .logo span:nth-child(2){color:#ea4335}
+  .logo span:nth-child(3){color:#fbbc05} .logo span:nth-child(4){color:#4285f4}
+  .logo span:nth-child(5){color:#34a853} .logo span:nth-child(6){color:#ea4335}
+  .logo span:nth-child(7){color:#4285f4} .logo span:nth-child(8){color:#ea4335}
+  .logo span:nth-child(9){color:#fbbc05} .logo span:nth-child(10){color:#34a853}
+  .logo span:nth-child(11){color:#ea4335}
+  .logo span.l { display: inline-block; transition: transform .2s; }
+  .logo span.l:hover { transform: translateY(-8px) rotate(-6deg); }
+  .logo small { font-size: 20px; letter-spacing: 0; color: var(--accent); font-weight: 700; margin-left: 6px; }
+  .tagline { text-align: center; color: var(--muted); margin: 4px 0 22px; }
+
+  /* ---------- Search box ---------- */
+  .searchbar { display: flex; gap: 10px; max-width: 680px; margin: 0 auto; }
+  .searchbar input {
+    flex: 1; min-width: 0; font-size: 18px; padding: 14px 22px; border-radius: 40px;
+    border: 2px solid var(--line); outline: none; background: var(--card); color: var(--ink);
+    box-shadow: var(--shadow); font-family: inherit;
+  }
+  .searchbar input:focus { border-color: var(--accent); }
+  .go {
+    font-size: 17px; font-weight: 700; color: #fff; border: none; padding: 0 28px;
+    border-radius: 40px; background: linear-gradient(135deg, #4285f4, #7a4cff);
+    box-shadow: 0 4px 14px rgba(90, 80, 220, .35);
+  }
+  .go:hover { filter: brightness(1.1); }
+  .hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  kbd { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+
+  .chips { text-align: center; margin: 10px 0 0; }
+  .chips button {
+    margin: 4px; padding: 7px 16px; border-radius: 20px; font-size: 15px;
+    border: 2px solid var(--line); background: var(--card); color: var(--accent); font-weight: 600;
+  }
+  .chips button:hover { background: var(--accent); color: #fff; }
+  .chips .dice { border-style: dashed; }
+  .chips .past { font-size: 13px; padding: 4px 12px; color: var(--muted); }
+  .chips .label { font-size: 13px; color: var(--muted); }
+
+  /* ---------- Stat tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 22px 0 6px; }
+  .tile { background: var(--card); border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow);
+    display: flex; gap: 12px; align-items: center; animation: pop .35s ease both; }
+  .tile .ico { font-size: 28px; }
+  .tile b { display: block; font-size: 18px; word-break: break-all; }
+  .tile small { color: var(--muted); font-size: 12.5px; }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    justify-content: center; margin: 14px 0 8px; font-size: 14px; color: var(--muted); }
+  .again {
+    border: 2px dashed #34a853; background: #eafaf0; color: #1d7a3a;
+    padding: 7px 16px; border-radius: 20px; font-weight: 700;
+  }
+  .again:hover { background: #34a853; color: #fff; }
+  .again.spin { animation: wob .5s; }
+  @keyframes wob { 30% { transform: rotate(-4deg) scale(1.06); } 70% { transform: rotate(4deg) scale(1.06); } }
+
+  .insight { text-align: center; margin: 8px auto 16px; max-width: 800px;
+    background: var(--card); border-radius: 14px; padding: 10px 16px;
+    box-shadow: var(--shadow); font-size: 15px; }
+  .insight:empty { display: none; }
+
+  /* ---------- Surfer map panel ---------- */
+  .panel { background: var(--card); border-radius: var(--radius); padding: 12px 18px 18px;
+    box-shadow: var(--shadow); margin: 14px 0 22px; }
+  .panel > summary { cursor: pointer; font-weight: 700; color: var(--accent); font-size: 17px; }
+  .mapgrid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 12px; }
+  @media (max-width: 860px) { .mapgrid { grid-template-columns: 1fr; } }
+  #map { width: 100%; height: auto; background: rgba(120,130,220,.07); border-radius: 12px; display: block; }
+  #map line { stroke: #9aa0c8; stroke-width: 1.2; opacity: .55; }
+  #map line.hot { stroke: #7a4cff; stroke-width: 2.2; opacity: .95; }
+  .node circle { stroke: var(--card); stroke-width: 2; transition: r .4s; }
+  .node text { font-size: 11px; font-weight: 700; text-anchor: middle; dominant-baseline: central;
+    pointer-events: none; font-family: "Segoe UI", Arial, sans-serif; }
+  .node.hit circle { fill: #34a853; }   .node.hit text { fill: #fff; }
+  .node.dim circle { fill: var(--dimnode); }  .node.dim text { fill: var(--dimtext); }
+  .node.spam circle { stroke: #ea4335; stroke-width: 3.5; }
+  .node.hot circle { stroke: #f5a623; stroke-width: 4; }
+  .node { cursor: pointer; }
+  .node.pulse circle { animation: ping .6s; transform-box: fill-box; transform-origin: center; }
+  @keyframes ping { 50% { transform: scale(1.35); } }
+  .tok { transition: transform .55s ease-in-out; pointer-events: none; }
+  .mapinfo { min-height: 22px; font-size: 14px; margin: 8px 2px 0; color: var(--muted); }
+  .legend { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+  .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  .walk { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; }
+  .walk button { background: #fff3d6; border: 2px solid #f5a623; color: #8a5a00; padding: 6px 14px;
+    border-radius: 20px; font-weight: 700; }
+  .walk button:hover { background: #f5a623; color: #fff; }
+  .board h3 { margin: 0 0 8px; font-size: 16px; }
+  .board .row { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13.5px;
+    border-bottom: 1px dashed var(--line); }
+  .board .row i { font-style: normal; width: 24px; }
+  .board .row .u { flex: 1; word-break: break-all; }
+  .board .row b { color: #1d7a3a; }
+  .board p { font-size: 12.5px; color: var(--muted); }
+
+  /* ---------- Two columns ---------- */
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .columns { grid-template-columns: 1fr; } }
+  .col h2 { margin: 0 0 12px; padding: 10px 16px; border-radius: 14px; color: #fff; font-size: 19px; }
+  .old h2  { background: var(--oldbg); }
+  .surf h2 { background: var(--surfbg); }
+  .col h2 small { font-weight: 400; opacity: .92; font-size: 13px; display: block; }
+
+  /* ---------- Result cards ---------- */
+  .card {
+    display: flex; gap: 12px; background: var(--card); border-radius: var(--radius); padding: 14px;
+    margin-bottom: 12px; box-shadow: var(--shadow);
+    border-left: 6px solid #ccc; animation: pop .35s ease both;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .old  .card { border-left-color: #bf8a4b; }
+  .surf .card { border-left-color: #34a853; }
+  .card.twin { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(122,76,255,.4); outline: 2px solid #7a4cff; }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .rank {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; color: #fff;
+    display: grid; place-items: center; font-weight: 800; background: #9aa0c8;
+  }
+  .card.first .rank { background: #f5a623; box-shadow: 0 0 0 4px #ffe7b3; }
+  .body { flex: 1; min-width: 0; }
+  .url { color: #1a7f37; font-size: 14px; font-weight: 600; word-break: break-all; }
+  body.dark .url { color: #6fdc8c; }
+  body.retro .url { color: #0000ee; text-decoration: underline; }
+  .text { margin: 6px 0 10px; line-height: 1.45; font-size: 15px; }
+  mark { background: #ffe14d; color: #1f2340; padding: 0 3px; border-radius: 4px; font-weight: 700; }
+  .scores { display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 700; gap: 8px; flex-wrap: wrap; }
+  .count { color: #a0622d; background: #fff1e0; padding: 3px 10px; border-radius: 10px; }
+  .pct   { color: #1d7a3a; background: #e3f7ea; padding: 3px 10px; border-radius: 10px; }
+  .bar { height: 7px; background: rgba(120,130,220,.18); border-radius: 4px; margin-top: 8px; overflow: hidden; }
+  .bar div { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #4285f4, #34a853);
+    animation: grow .9s ease both; }
+  @keyframes grow { from { width: 0; } }
+  .extra { margin-top: 8px; font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .linksin { background: #eaf1ff; color: #2a5bd7; padding: 3px 10px; border-radius: 10px; font-weight: 700; }
+  .move { padding: 3px 10px; border-radius: 10px; font-weight: 700; }
+  .up   { background: #e3f7ea; color: #1d7a3a; }
+  .down { background: #fde8e8; color: #b42318; }
+  .same { background: #f0f0f5; color: #666; }
+  .flag { background: #fde8e8; color: #b42318; padding: 3px 10px; border-radius: 10px; font-weight: 700; }
+  .wiggle { margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+  .nothing { text-align: center; background: var(--card); border-radius: 20px; padding: 36px 20px;
+    max-width: 560px; margin: 20px auto; box-shadow: var(--shadow); }
+  .nothing .big { font-size: 60px; animation: wob 1.2s infinite; }
+
+  /* ---------- How it works ---------- */
+  .how { max-width: 800px; margin: 28px auto 0; background: var(--card); border-radius: 14px;
+    padding: 12px 18px; box-shadow: var(--shadow); }
+  .how summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+  .how p, .how li { line-height: 1.55; font-size: 14.5px; }
+  .foot { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 26px; }
+
+  /* ---------- 1998 mode: chunky grey buttons ---------- */
+  body.retro button, body.retro .go { background: #c0c0c0; color: #000; border: 2px outset #fff;
+    border-radius: 0; box-shadow: none; }
+  body.retro .searchbar input { border: 2px inset #808080; border-radius: 0; }
+  body.retro .logo { text-shadow: none; }
+  body.retro .card, body.retro .tile, body.retro .panel, body.retro .insight, body.retro .how {
+    border: 2px outset #fff; }
+  body.retro .col h2 { border-radius: 0; }
+</style>
+</head>
+<body class="modern">
+
+<div class="ticker"><span id="tickerText"></span></div>
+
+<div class="wrap">
+
+  <div class="topbar"><button class="pill" id="themeBtn"></button></div>
+
+  <h1 class="logo" id="logo"></h1>
+  <p class="tagline">Old way (count the words) vs Surfer way (follow the links)</p>
+
+  <div class="searchbar">
+    <input id="box" type="text" list="words" autocomplete="off" placeholder="Type one word, e.g. pizza" autofocus>
+    <datalist id="words"></datalist>
+    <button class="go" id="goBtn">Search</button>
+  </div>
+  <div class="hint">Press <kbd>Enter</kbd> to search, or <kbd>/</kbd> to jump to the box</div>
+
+  <div class="chips">
+    Try:
+    <button data-word="pizza">pizza</button>
+    <button data-word="cricket">cricket</button>
+    <button data-word="movie">movie</button>
+    <button data-word="exam">exam</button>
+    <button class="dice" id="diceBtn">🎲 Surprise me</button>
+  </div>
+  <div class="chips" id="history"></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="toolbar">
+    <span id="surferInfo"></span>
+    <button class="again" id="againBtn">🏄 Run the surfer again</button>
+  </div>
+
+  <details class="panel" open>
+    <summary>🗺️ Surfer map: who links to whom</summary>
+    <div class="mapgrid">
+      <div>
+        <svg id="map" viewBox="0 0 720 380"></svg>
+        <div class="mapinfo" id="mapInfo">Hover over a circle to see that page. Bigger circle = higher surfer score.</div>
+        <div class="legend">
+          <span><span class="dot" style="background:#34a853"></span>matches your word</span>
+          <span><span class="dot" style="background:#d5d9f0"></span>other pages</span>
+          <span><span class="dot" style="background:#fff;border:3px solid #ea4335"></span>spam smell</span>
+        </div>
+        <div class="walk">
+          <button id="walkBtn">🏄 Watch the surfer</button>
+          <span id="walkInfo"></span>
+        </div>
+      </div>
+      <div class="board" id="board"></div>
+    </div>
+  </details>
+
+  <div class="insight" id="insight"></div>
+  <div id="results"></div>
+
+  <details class="how">
+    <summary>How does this work? (and things to try)</summary>
+    <p><b>Old way:</b> count how many times the word appears in each page. Spammers just repeat the word again and again!</p>
+    <p><b>Surfer way:</b> a pretend surfer starts on a random page and makes 100,000 moves.
+      15% of the time he gets bored and jumps to any random page. Otherwise he clicks a random link.
+      Pages that lots of other pages link to get visited a lot, so they get a high surfer score.
+      This idea is called PageRank, the idea that made Google famous.</p>
+    <ul>
+      <li>Search <b>exam</b> or <b>pizza</b> and look for the red 🚩 spam-smell tag.</li>
+      <li>Hover a result card: the same page lights up in the other column and on the map.</li>
+      <li>Press <b>Run the surfer again</b>. The scores wiggle a little, because the surfer is random.</li>
+      <li>Press <b>Watch the surfer</b> to see a slow-motion walk (the real run does 100,000 moves instantly).</li>
+      <li>Try the theme button for Dark mode and a 1998 retro look.</li>
+    </ul>
+  </details>
+
+  <div class="foot">Mini Google 1998 &middot; made for the first-year AI lab &middot; no servers, no libraries, just one file</div>
+</div>
+
+<script>
+// =====================================================
+//  1. THE DATA  (replace the rows below with your own)
+//     Columns: page,url,text,links_to
+//     links_to = page numbers separated by ";"
+// =====================================================
+const DATA = `page,url,text,links_to
+1,pizzapizzapizza.com,"pizza pizza pizza pizza pizza cheap pizza buy pizza now best pizza pizza deals",2
+2,pizzadeals-4u.com,"pizza pizza pizza coupons pizza pizza click here for pizza",1
+3,www.slicehistory.org,"The history of pizza starts in Naples, where bakers made the first margherita pizza.",4;5
+4,www.italy-travel.com,"Travel guide to Italy: visit Naples and eat real pizza by the sea. Also see Rome and Florence.",3;5
+5,www.foodwiki.org,"Food encyclopedia: pizza, pasta, sushi, biryani and more. Trusted by cooks everywhere.",3;6;7
+6,www.pastalovers.net,"Pasta recipes from nonna. Not pizza, but just as tasty.",5
+7,www.biryanibox.in,"Hyderabadi biryani recipes, spice tips and chai.",5
+8,www.cricketcentral.com,"Cricket scores, news and live updates. The cricket world cup is here. Cricket cricket cricket!",9;10
+9,www.iplfanzone.in,"IPL cricket fan zone: teams, players and match schedules.",8;10
+10,www.cricinfo-wiki.org,"Encyclopedia of cricket: rules, history, famous players and stadiums.",8;9
+11,www.cheapcricketbats.biz,"cricket bat cricket ball cricket cricket cricket buy cricket gear cheap cricket",8
+12,www.sportsdaily.com,"Sports daily: football, cricket, tennis and kabaddi results.",8;9;10
+13,www.moviemania.com,"Movie reviews, movie trailers and the latest movie news. Every movie ever made.",14;15
+14,www.bollywoodbuzz.in,"Bollywood gossip, movie releases and song charts.",13;15
+15,www.filmhistory.org,"A short history of cinema: the first movie was shown in Paris in 1895.",13;14
+16,www.freemovies-now.biz,"movie movie movie free movie download watch movie movie online",13
+17,www.examprep101.com,"Exam tips: plan your revision, sleep well and do not panic before an exam. Past exam papers inside.",18;19
+18,www.studybuddy.edu,"Study techniques for every exam: spaced practice, recall and practice tests.",17;19
+19,www.nst-campus.edu,"Campus news, timetables and exam dates for first-year students.",17;18
+20,www.examdump-cheat.biz,"exam exam exam answers exam cheat sheet exam exam leaked exam",17
+21,www.mamas-pizza.com,"Mama's pizza kitchen: wood fired pizza, garlic bread and cold drinks.",3;4
+22,www.notebook-memes.com,"Memes about notebooks, chai and sleepy lectures. No exam, no stress.",`;
+
+// How many moves the surfer makes, and how often he gets bored
+const MOVES = 100000;
+const BORED = 0.15;
+
+const $ = id => document.getElementById(id);   // short helper
+
+// =====================================================
+//  2. READ THE DATA into a simple list of page objects
+// =====================================================
+
+// Tiny CSV reader (handles "quoted, text with commas")
+function parseCSV(text) {
+  const rows = []; let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }   // "" means one quote
+      else if (c === '"') inQuotes = false;
+      else field += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else if (c !== "\r") field += c;
+  }
+  row.push(field); rows.push(row);
+  return rows;
+}
+
+const rows = parseCSV(DATA.trim()).slice(1);          // slice(1) skips the header row
+const pages = rows.map(r => ({
+  id: Number(r[0]),
+  url: r[1],
+  text: r[2],
+  links: r[3] ? r[3].split(";").map(Number) : [],     // list of page numbers
+  linksIn: 0,                                         // filled in below
+  score: 0,                                           // surfer score (%), filled in later
+  history: []                                         // score from every surfer run
+}));
+
+// Position of each page in the list, found by its page number
+const indexOf = {};
+pages.forEach((p, i) => indexOf[p.id] = i);
+
+// Remove links to pages that don't exist, then count "Links in"
+pages.forEach(p => p.links = p.links.filter(id => id in indexOf));
+pages.forEach(p => p.links.forEach(id => pages[indexOf[id]].linksIn++));
+
+// A list of every word in the pages (used for the autocomplete and the dice button)
+const vocab = [...new Set(pages.flatMap(p => p.text.toLowerCase().match(/[a-z]{4,}/g) || []))].sort();
+$("words").innerHTML = vocab.map(w => '<option value="' + w + '">').join("");
+
+// =====================================================
+//  3. THE RANDOM SURFER
+// =====================================================
+let surferRuns = 0;
+
+// One surfer move. Returns the index of the page he lands on.
+function surferMove(now) {
+  const page = pages[now];
+  if (Math.random() < BORED || page.links.length === 0) {
+    return Math.floor(Math.random() * pages.length);          // bored (or stuck): jump anywhere
+  }
+  const pick = page.links[Math.floor(Math.random() * page.links.length)];
+  return indexOf[pick];                                       // click a random link
+}
+
+function runSurfer() {
+  const start = performance.now();
+  const visits = new Array(pages.length).fill(0);
+  let now = Math.floor(Math.random() * pages.length);         // start on a random page
+
+  for (let move = 0; move < MOVES; move++) {
+    now = surferMove(now);
+    visits[now]++;                                            // count the visit
+  }
+  pages.forEach((p, i) => {
+    p.score = visits[i] / MOVES * 100;                        // visits / 100,000 as a %
+    p.history.push(p.score);
+  });
+  surferRuns++;
+  const ms = Math.max(1, Math.round(performance.now() - start));
+  $("surferInfo").textContent = "Surfer run #" + surferRuns + ": " + MOVES.toLocaleString() + " moves in " + ms + " ms";
+}
+
+// =====================================================
+//  4. SMALL HELPERS
+// =====================================================
+
+// Make a word safe to use inside a regular expression
+function escapeRegex(w) { return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+// Make text safe to show in HTML
+function escapeHTML(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Count whole-word matches, ignoring capitals
+function countWord(text, word) {
+  const m = text.match(new RegExp("\\b" + escapeRegex(word) + "\\b", "gi"));
+  return m ? m.length : 0;
+}
+
+// Return the text as HTML with every match wrapped in <mark>
+function highlight(text, word) {
+  const re = new RegExp("\\b" + escapeRegex(word) + "\\b", "gi");
+  let out = "", last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    out += escapeHTML(text.slice(last, m.index)) + "<mark>" + escapeHTML(m[0]) + "</mark>";
+    last = m.index + m[0].length;
+  }
+  return out + escapeHTML(text.slice(last));
+}
+
+// "Spam smell": the word is shouted many times, but almost nobody links to the page
+function isSpammy(p, word) {
+  return countWord(p.text, word) >= 4 && p.linksIn <= 1;
+}
+
+// =====================================================
+//  5. THE SURFER MAP (a little picture of the web)
+// =====================================================
+const W = 720, H = 380, NS = "http://www.w3.org/2000/svg";
+
+// Work out where each page sits: pages that link to each other pull together,
+// and all pages push apart a little (a tiny "force layout").
+pages.forEach((p, i) => {
+  const a = i / pages.length * Math.PI * 2;
+  p.x = W / 2 + Math.cos(a) * 220;
+  p.y = H / 2 + Math.sin(a) * 140;
+});
+for (let step = 0; step < 300; step++) {
+  pages.forEach(p => { p.dx = 0; p.dy = 0; });
+  for (let i = 0; i < pages.length; i++) {                    // push apart
+    for (let j = i + 1; j < pages.length; j++) {
+      const a = pages[i], b = pages[j];
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const d2 = dx * dx + dy * dy + 0.01, d = Math.sqrt(d2), f = 3500 / d2;
+      a.dx += dx / d * f; a.dy += dy / d * f; b.dx -= dx / d * f; b.dy -= dy / d * f;
+    }
+  }
+  pages.forEach(p => p.links.forEach(id => {                  // pull together along links
+    const q = pages[indexOf[id]];
+    const dx = q.x - p.x, dy = q.y - p.y, d = Math.sqrt(dx * dx + dy * dy) + 0.01, f = (d - 80) * 0.03;
+    p.dx += dx / d * f; p.dy += dy / d * f; q.dx -= dx / d * f; q.dy -= dy / d * f;
+  }));
+  pages.forEach(p => {                                        // gentle pull to the middle, then move
+    p.dx += (W / 2 - p.x) * 0.01; p.dy += (H / 2 - p.y) * 0.012;
+    p.x = Math.min(W - 32, Math.max(32, p.x + p.dx));
+    p.y = Math.min(H - 32, Math.max(32, p.y + p.dy));
+  });
+}
+
+const radius = p => 9 + Math.sqrt(p.score) * 4;               // bigger score = bigger circle
+let matchIds = new Set();                                     // pages matching the current search
+
+function drawMap() {
+  stopWalk();
+  let s = '<defs>' +
+    '<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9aa0c8"/></marker>' +
+    '<marker id="arrHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7a4cff"/></marker></defs>';
+
+  // Arrows (links). Stop each arrow at the edge of the circle it points to.
+  pages.forEach(p => p.links.forEach(id => {
+    const q = pages[indexOf[id]];
+    const dx = q.x - p.x, dy = q.y - p.y, d = Math.sqrt(dx * dx + dy * dy) + 0.01;
+    const x2 = q.x - dx / d * (radius(q) + 3), y2 = q.y - dy / d * (radius(q) + 3);
+    const hot = matchIds.has(p.id) && matchIds.has(q.id);
+    s += '<line class="' + (hot ? "hot" : "") + '" x1="' + p.x.toFixed(1) + '" y1="' + p.y.toFixed(1) +
+      '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" marker-end="url(#' + (hot ? "arrHot" : "arr") + ')"/>';
+  }));
+
+  // Circles (pages)
+  const word = lastWord;
+  pages.forEach((p, i) => {
+    const hit = matchIds.has(p.id);
+    const spam = hit && isSpammy(p, word);
+    s += '<g class="node ' + (hit ? "hit" : "dim") + (spam ? " spam" : "") + '" data-i="' + i + '">' +
+      '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + radius(p).toFixed(1) + '"/>' +
+      '<text x="' + p.x.toFixed(1) + '" y="' + p.y.toFixed(1) + '">' + p.id + '</text></g>';
+  });
+  $("map").innerHTML = s;
+}
+
+// Hovering a circle shows its details and lights up its cards
+$("map").addEventListener("mouseover", e => {
+  const g = e.target.closest(".node");
+  if (!g) return;
+  const p = pages[g.dataset.i];
+  $("mapInfo").textContent = "#" + p.id + " " + p.url + "  |  surfer score " + p.score.toFixed(1) +
+    "%  |  Links in: " + p.linksIn + "  |  Links out: " + p.links.length;
+  setHot(p.id);
+});
+$("map").addEventListener("mouseleave", () => setHot(null));
+
+// The leaderboard: top 5 pages of the whole web, no search needed
+function drawBoard() {
+  const top = [...pages].sort((a, b) => b.score - a.score).slice(0, 5);
+  $("board").innerHTML = "<h3>🌍 Most popular pages (all of the web)</h3>" +
+    top.map((p, i) => '<div class="row"><i>' + ["🥇", "🥈", "🥉", "4.", "5."][i] + '</i><span class="u">' +
+      escapeHTML(p.url) + '</span><b>' + p.score.toFixed(1) + '%</b></div>').join("") +
+    "<p>These pages have the most links pointing at them (or at the pages that point at them). " +
+    "The surfer keeps landing here whatever you search for.</p>";
+}
+
+// ---------- Slow-motion surfer demo ----------
+let walkTimer = null, walkAt = 0, walkHops = 0, token = null;
+
+function moveToken() {
+  const p = pages[walkAt];
+  token.style.transform = "translate(" + p.x + "px," + p.y + "px)";
+}
+
+function walkStep() {
+  const from = pages[walkAt];
+  const bored = Math.random() < BORED || from.links.length === 0;
+  walkAt = surferMove(walkAt);
+  walkHops++;
+  moveToken();
+  const g = document.querySelector('#map [data-i="' + walkAt + '"]');
+  if (g) { g.classList.add("pulse"); setTimeout(() => g.classList.remove("pulse"), 600); }
+  $("walkInfo").textContent = "Hop " + walkHops + ": " + (bored ? "😴 bored, jumped to " : "🖱️ clicked a link to ") + pages[walkAt].url;
+}
+
+function startWalk() {
+  drawMap();
+  walkAt = Math.floor(Math.random() * pages.length);
+  walkHops = 0;
+  token = document.createElementNS(NS, "g");
+  token.setAttribute("class", "tok");
+  const t = document.createElementNS(NS, "text");
+  t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "26"); t.setAttribute("y", "-14");
+  t.textContent = "🏄";
+  token.appendChild(t);
+  $("map").appendChild(token);
+  moveToken();
+  $("walkBtn").textContent = "⏹ Stop the demo";
+  $("walkInfo").textContent = "Slow-motion demo (it does not change the scores).";
+  walkTimer = setInterval(walkStep, 800);
+}
+
+function stopWalk() {
+  if (walkTimer) clearInterval(walkTimer);
+  walkTimer = null;
+  if (token && token.parentNode) token.parentNode.removeChild(token);
+  token = null;
+  $("walkBtn").textContent = "🏄 Watch the surfer";
+  $("walkInfo").textContent = "";
+}
+$("walkBtn").onclick = () => walkTimer ? stopWalk() : startWalk();
+
+// =====================================================
+//  6. SEARCHING AND SHOWING RESULTS
+// =====================================================
+const funnyMessages = [
+  ["🕵️", "No page knows that word. Even our surfer shrugged."],
+  ["🦗", "Chirp... chirp... nothing here but crickets (the insect kind)."],
+  ["🏄", "The surfer made 100,000 moves and came back empty-handed!"],
+  ["🍕", "Zero results. Try 'pizza', it never lets anyone down."],
+  ["📼", "It's 1998 and that word hasn't been invented yet. Try another!"],
+  ["🤖", "Our robot read every page twice. Still nothing. It is now sulking."]
+];
+
+let lastWord = "";
+let pastSearches = [];
+
+// Draw one card. 'side' is "old" or "surf"
+function cardHTML(p, rank, side, word, maxScore, otherRank) {
+  const count = countWord(p.text, word);
+  const spam = isSpammy(p, word);
+  let html = '<div class="card' + (rank === 1 ? " first" : "") + '" data-id="' + p.id + '">' +
+    '<div class="rank">' + rank + '</div><div class="body">' +
+    '<div class="url">' + (side === "surf" && rank === 1 ? "👑 " : "") + escapeHTML(p.url) + '</div>' +
+    '<div class="text">' + highlight(p.text, word) + '</div>' +
+    '<div class="scores"><span class="count">Word count: ' + count + '</span>' +
+    '<span class="pct">Surfer score: ' + p.score.toFixed(1) + '%</span></div>';
+
+  if (side === "surf") {
+    const width = maxScore > 0 ? (p.score / maxScore * 100) : 0;
+    html += '<div class="bar"><div style="width:' + width + '%"></div></div>';
+    // How far did this page move compared with the old way?
+    const diff = otherRank - rank;
+    let move = '<span class="move same">same rank as old way</span>';
+    if (diff > 0) move = '<span class="move up">▲ up ' + diff + ' vs old way</span>';
+    if (diff < 0) move = '<span class="move down">▼ down ' + (-diff) + ' vs old way</span>';
+    html += '<div class="extra"><span class="linksin">Links in: ' + p.linksIn + '</span>' + move +
+      (spam ? '<span class="flag">🚩 Spam smell</span>' : '') + '</div>';
+    if (p.history.length > 1) {                       // show how much the score wiggles between runs
+      html += '<div class="wiggle">Wiggle over ' + p.history.length + ' runs: ' +
+        Math.min(...p.history).toFixed(1) + '% to ' + Math.max(...p.history).toFixed(1) + '%</div>';
+    }
+  } else if (spam) {
+    html += '<div class="extra"><span class="flag">🚩 Spam smell: shouts the word, nobody links here</span></div>';
+  }
+  return html + '</div></div>';
+}
+
+function tile(icon, big, small) {
+  return '<div class="tile"><span class="ico">' + icon + '</span><div><b>' + big + '</b><small>' + small + '</small></div></div>';
+}
+
+function search(word) {
+  word = word.trim().toLowerCase();
+  if (!word) return;
+  lastWord = word;
+  $("box").value = word;
+
+  // Keep only pages that contain the word
+  const matches = pages.filter(p => countWord(p.text, word) > 0);
+  matchIds = new Set(matches.map(p => p.id));
+
+  // Remember the search
+  pastSearches = [word, ...pastSearches.filter(w => w !== word)].slice(0, 6);
+  $("history").innerHTML = pastSearches.length > 1 ? '<span class="label">Recent:</span>' +
+    pastSearches.slice(1).map(w => '<button class="past" data-word="' + escapeHTML(w) + '">🕘 ' + escapeHTML(w) + '</button>').join("") : "";
+
+  if (matches.length === 0) {
+    const [emoji, msg] = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+    $("tiles").innerHTML = "";
+    $("insight").innerHTML = "";
+    $("results").innerHTML = '<div class="nothing"><div class="big">' + emoji + '</div><h3>Nothing found for "' +
+      escapeHTML(word) + '"</h3><p>' + msg + '</p></div>';
+    drawMap();
+    return;
+  }
+
+  // Ranking 1: most word count first (ties: lower page number first)
+  const oldList = [...matches].sort((a, b) =>
+    countWord(b.text, word) - countWord(a.text, word) || a.id - b.id);
+  // Ranking 2: highest surfer score first
+  const surfList = [...matches].sort((a, b) => b.score - a.score || a.id - b.id);
+
+  // Remember each page's rank in both lists
+  const oldRank = {}, surfRank = {};
+  oldList.forEach((p, i) => oldRank[p.id] = i + 1);
+  surfList.forEach((p, i) => surfRank[p.id] = i + 1);
+  const maxScore = surfList[0].score;
+
+  // Who climbed the most, who fell the most?
+  let climber = null, faller = null;
+  matches.forEach(p => {
+    const move = oldRank[p.id] - surfRank[p.id];
+    if (move > 0 && (!climber || move > climber.move)) climber = { p, move };
+    if (move < 0 && (!faller || move < faller.move)) faller = { p, move };
+  });
+  const spamCount = matches.filter(p => isSpammy(p, word)).length;
+
+  $("tiles").innerHTML =
+    tile("🔎", matches.length + " of " + pages.length, "pages contain \"" + escapeHTML(word) + "\"") +
+    tile("🚩", spamCount, spamCount === 1 ? "page with a spam smell" : "pages with a spam smell") +
+    tile("🚀", climber ? "+" + climber.move : "none", climber ? "biggest climber: " + escapeHTML(climber.p.url) : "nobody climbed") +
+    tile("📉", faller ? faller.move : "none", faller ? "biggest drop: " + escapeHTML(faller.p.url) : "nobody dropped");
+
+  // Fun summary line
+  $("insight").innerHTML = oldList[0].id !== surfList[0].id
+    ? "🎯 The two ways disagree! Old way picks <b>" + escapeHTML(oldList[0].url) + "</b> but the surfer picks <b>" + escapeHTML(surfList[0].url) + "</b>."
+    : "🤝 Both ways agree: <b>" + escapeHTML(oldList[0].url) + "</b> is #1.";
+
+  $("results").innerHTML =
+    '<div class="columns">' +
+      '<div class="col old"><h2>📜 Old way <small>(1997): most mentions wins</small></h2>' +
+        oldList.map((p, i) => cardHTML(p, i + 1, "old", word, maxScore, 0)).join("") + '</div>' +
+      '<div class="col surf"><h2>🏄 Surfer way <small>(1998): most visits wins</small></h2>' +
+        surfList.map((p, i) => cardHTML(p, i + 1, "surf", word, maxScore, oldRank[p.id])).join("") + '</div>' +
+    '</div>';
+
+  drawMap();
+}
+
+// Hover a card (or a map circle) and its twin lights up everywhere
+let hotId = null;
+function setHot(id) {
+  if (id === hotId) return;
+  hotId = id;
+  document.querySelectorAll(".card.twin").forEach(c => c.classList.remove("twin"));
+  document.querySelectorAll(".node.hot").forEach(n => n.classList.remove("hot"));
+  if (id === null) return;
+  document.querySelectorAll('.card[data-id="' + id + '"]').forEach(c => c.classList.add("twin"));
+  const n = document.querySelector('#map [data-i="' + indexOf[id] + '"]');
+  if (n) n.classList.add("hot");
+}
+$("results").addEventListener("mouseover", e => {
+  const c = e.target.closest(".card");
+  setHot(c ? Number(c.dataset.id) : null);
+});
+$("results").addEventListener("mouseleave", () => setHot(null));
+
+// =====================================================
+//  7. BUTTONS, THEMES AND EXTRAS
+// =====================================================
+$("goBtn").onclick = () => search($("box").value);
+$("box").addEventListener("keydown", e => { if (e.key === "Enter") search(e.target.value); });
+// Example buttons and "recent" buttons (both carry a data-word)
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-word]");
+  if (b) search(b.dataset.word);
+});
+$("diceBtn").onclick = () => search(vocab[Math.floor(Math.random() * vocab.length)]);
+
+$("againBtn").onclick = () => {
+  runSurfer();
+  drawBoard();
+  if (lastWord) search(lastWord);                    // refresh the results
+  $("againBtn").classList.remove("spin"); void $("againBtn").offsetWidth; $("againBtn").classList.add("spin");
+};
+
+// Press "/" anywhere to jump to the search box
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && document.activeElement !== $("box")) { e.preventDefault(); $("box").focus(); }
+});
+
+// Logo: one coloured, wobbly span per letter
+$("logo").innerHTML = "Mini Google".split("").map(c =>
+  c === " " ? " " : '<span class="l">' + c + '</span>').join("") + "<small>1998</small>";
+
+// Theme button: modern -> dark -> 1998
+const themes = ["modern", "dark", "retro"];
+const themeNames = { modern: "🎨 Modern", dark: "🌙 Dark", retro: "📺 1998 mode" };
+function setTheme(t) {
+  document.body.className = t;
+  $("themeBtn").textContent = themeNames[t] + " (click to change)";
+  try { localStorage.setItem("mini-google-theme", t); } catch (e) {}
+}
+$("themeBtn").onclick = () => setTheme(themes[(themes.indexOf(document.body.className) + 1) % themes.length]);
+let savedTheme = "modern";
+try { savedTheme = localStorage.getItem("mini-google-theme") || "modern"; } catch (e) {}
+setTheme(themes.includes(savedTheme) ? savedTheme : "modern");
+
+// Visitor counter in the scrolling banner
+let visitors = 1998;
+try {
+  visitors = Number(localStorage.getItem("mini-google-visits") || 1997) + 1;
+  localStorage.setItem("mini-google-visits", visitors);
+} catch (e) {}
+$("tickerText").textContent = "🌐 Welcome to Mini Google!   ★   Best viewed in Netscape Navigator 4.0 at 800x600   ★   You are visitor #" +
+  String(visitors).padStart(6, "0") + "   ★   100,000 surfers can't be wrong   ★   Please sign our guestbook!";
+
+// =====================================================
+//  8. START
+// =====================================================
+runSurfer();      // the surfer runs once when the page opens
+drawBoard();
+search("pizza");
+</script>
+</body>
+</html>
